@@ -2,9 +2,9 @@
   "name": "server",
   "version": "0.0.1",
   "description": "perevod",
-  "main": "bin/server.js",
+  "main": "./run/server.js",
   "scripts": {
-    "start": "node ./bin/server.js"
+    "start": "node ./run/server.js"
   },
   "repository": {
     "type": "git",

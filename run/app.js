@@ -2,8 +2,6 @@
 // Системные модули
 //
 
-const path = require('path')
-
 
 // ----------------------------------------------------------------------------
 // Сторонние модули
@@ -12,7 +10,7 @@ const path = require('path')
 // модули сервера express и шаблонизатора handlebars
 //
 const express = require(`express`),
-      hbs     = require(`express-handlebars`)
+      hbs     = require(`express-handlebars`);
 
 // промежуточное ПО
 //
@@ -28,65 +26,22 @@ const uuid = require('uuid/v4')
 // ----------------------------------------------------------------------------
 // Собственные модули
 //
-//const app = require('./app')
-
+const dir = require('./dir')
 
 
 // ----------------------------------------------------------------------------
-// Используемые каталоги
-//
-
-// каталог сервера
-//
-let serverDir = __dirname.replace(/\\/g, '/').toLowerCase()
-console.log('\nserverDir   ==> ', serverDir)
-
-// каталог проекта
-//
-let baseDir = path.dirname(serverDir)
-console.log('baseDir     ==> ', baseDir)
-
-// каталог статических  файлов
-//
-let publicDir = baseDir + `/public`
-console.log('publicDir   ==> ', publicDir)
-
-// каталог представлений
-//
-let viewsDir = baseDir + `/views`
-console.log('viewsDir    ==> ', viewsDir)
-
-// каталог шаблонов
-//
-let layoutsDir = baseDir + `/views/layouts`
-console.log('layoutsDir  ==> ', layoutsDir)
-
-// каталог частичных шаблонов
-//
-let partialsDir = baseDir + `/views/partials`
-console.log('partialsDir ==> ', partialsDir)
-
-// каталог журналов
-//
-let logDir = baseDir + `/log`
-console.log('logDir      ==> ', logDir)
-
-
-
-
-
 
 
 const app = express()
 
 // Подключаем шаблонизатор Handlebars
 //
-app.set('views', viewsDir)                      // каталог представлений
+app.set('views', dir.views)                     // каталог представлений
 app.engine(`hbs`, hbs( {
   extname: `hbs`,                               // расширение файлов-шаблонов
   defaultLayout: `main`,                        // основной шаблон
-  layoutsDir: layoutsDir,                       // каталог шаблонов
-  partialsDir: partialsDir,                     // каталог частичных шаблонов
+  layoutsDir: dir.layouts,                      // каталог шаблонов
+  partialsDir: dir.partials,                    // каталог частичных шаблонов
   helpers: {                                    // механизм "секций"
     section: function(name, options){
       if(!this._sections) this._sections = {}
@@ -101,30 +56,31 @@ app.set('view engine', 'hbs')
 //
 switch(app.get('env')){
   case 'development':
-    // модуль 'morgan'
+    // Режим разработки
+    // подключаем модуль 'morgan', который
     // поддерживает сжатое многоцветное журналирование для разработки
     app.use(require('morgan')('dev'))
     break
   case 'production':
-    // модуль 'express-logger'
+    // Режим эксплуатации
+    // подключаем модуль 'express-logger', который
     // поддерживает ежедневное чередование файлов журналов
     app.use(require('express-logger')({
-      path: logDir + '/requests.log'
+      path: dir.log + '/requests.log'
     }))
     break
-  }
-
-
-
-app.set('port', process.env.PORT || 3001)   // порт по умолчанию - 3001
-
-
+}
 
 
 // ----------------------------------------------------------------------------
-// Подключаем обработку статических файлов для нужд сервера
+// Подключаем обработку страниц
 //
-app.use(express.static(publicDir));         // каталог статических файлов
+
+// ----------------------------------------------------------------------------
+// Подключаем обработку статических файлов для нужд сервера
+// (промежуточное ПО)
+//
+app.use(express.static(dir.public));   // каталог статических файлов сервера
 
 // ----------------------------------------------------------------------------
 // Пользовательская страница '/'
@@ -137,7 +93,7 @@ app.get('/', function(req, res) {
 // Пользовательская страница '/users'
 //
 const users = {};     // массив? пользователей
-const ids = {};       // массив? cookies
+//const ids = {};       // массив? cookies
 
 app.get('/users', function (req, res) {
   const scorelist = Object.entries(users)
@@ -152,8 +108,6 @@ app.get('/users', function (req, res) {
 
   res.json(scorelist);
 });
-
-
 
 // ----------------------------------------------------------------------------
 // Пользовательская страница /about
@@ -182,8 +136,4 @@ app.use(function(err, req, res, next){
 });
 
 
-app.listen(app.get('port'), function() {
-  console.log('\nСервер Express запущен в режиме ' + app.get('env') +
-              '\nпо адресу http://localhost:' + app.get('port') +
-              '\nдля завершения работы сервера нажните Ctrl+C.')
-})
+module.exports = app
