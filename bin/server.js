@@ -14,12 +14,21 @@ const path = require('path')
 const express = require(`express`),
       hbs     = require(`express-handlebars`)
 
+// промежуточное ПО
+//
+const body = require('body-parser')         // ?
+const cookie = require('cookie-parser')     // ?
+const morgan = require('morgan')            // журналирование
+
+// модуль создания уникальных идентификаторов
+//
+const uuid = require('uuid/v4')
+
 
 // ----------------------------------------------------------------------------
 // Собственные модули
 //
-
-//import app from './app'
+//const app = require('./app')
 
 
 
@@ -57,6 +66,11 @@ console.log('layoutsDir  ==> ', layoutsDir)
 let partialsDir = baseDir + `/views/partials`
 console.log('partialsDir ==> ', partialsDir)
 
+// каталог журналов
+//
+let logDir = baseDir + `/log`
+console.log('logDir      ==> ', logDir)
+
 
 
 
@@ -64,9 +78,6 @@ console.log('partialsDir ==> ', partialsDir)
 
 
 const app = express()
-
-
-
 
 // Подключаем шаблонизатор Handlebars
 //
@@ -86,7 +97,22 @@ app.engine(`hbs`, hbs( {
 }))
 app.set('view engine', 'hbs')
 
-
+// Подключаем промежуточное ПО журналирования
+//
+switch(app.get('env')){
+  case 'development':
+    // модуль 'morgan'
+    // поддерживает сжатое многоцветное журналирование для разработки
+    app.use(require('morgan')('dev'))
+    break
+  case 'production':
+    // модуль 'express-logger'
+    // поддерживает ежедневное чередование файлов журналов
+    app.use(require('express-logger')({
+      path: logDir + '/requests.log'
+    }))
+    break
+  }
 
 
 
@@ -95,27 +121,24 @@ app.set('port', process.env.PORT || 3001)   // порт по умолчанию 
 
 
 
-// Подключаем промежуточное ПО обработки статических файлов
+// ----------------------------------------------------------------------------
+// Подключаем обработку статических файлов для нужд сервера
 //
-app.use(express.static(publicDir));             // каталог статических файлов
-
-
-
-
-
-
-
+app.use(express.static(publicDir));         // каталог статических файлов
 
 // ----------------------------------------------------------------------------
-// Пользовательская страница /home
+// Пользовательская страница '/'
 //
 app.get('/', function(req, res) {
   res.render('home');
 });
 
 // ----------------------------------------------------------------------------
-// Пользовательская страница /users
+// Пользовательская страница '/users'
 //
+const users = {};     // массив? пользователей
+const ids = {};       // массив? cookies
+
 app.get('/users', function (req, res) {
   const scorelist = Object.entries(users)
     .sort((l, r) => l.score - r.score)
@@ -159,12 +182,8 @@ app.use(function(err, req, res, next){
 });
 
 
-
-
-
-
-
 app.listen(app.get('port'), function() {
-  console.log('\nExpress запущен. Порт: ' + app.get('port') +
-              '\nДля завершения работы сервера нажните Ctrl+C.')
+  console.log('\nСервер Express запущен в режиме ' + app.get('env') +
+              '\nпо адресу http://localhost:' + app.get('port') +
+              '\nдля завершения работы сервера нажните Ctrl+C.')
 })
