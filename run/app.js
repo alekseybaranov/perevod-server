@@ -10,7 +10,7 @@
 // модули сервера express и шаблонизатора handlebars
 //
 const express = require(`express`),
-      hbs     = require(`express-handlebars`);
+      hbs     = require(`express-handlebars`)
 
 // промежуточное ПО
 //
@@ -22,11 +22,10 @@ const morgan = require('morgan')            // журналирование
 //
 const uuid = require('uuid/v4')
 
-
 // ----------------------------------------------------------------------------
 // Собственные модули
 //
-const dir = require('./dir')
+const dir = require('./dir')        // каталоги используемые приложением
 
 
 // ----------------------------------------------------------------------------
@@ -34,7 +33,7 @@ const dir = require('./dir')
 
 const app = express()
 
-// Подключаем шаблонизатор Handlebars
+// Подключаем шаблонизатор Handlebars (книга Бэнкс React и Rudux...)
 //
 app.set('views', dir.views)                     // каталог представлений
 app.engine(`hbs`, hbs( {
@@ -77,33 +76,32 @@ switch(app.get('env')){
 
 
 // ----------------------------------------------------------------------------
-// Подключаем обработку страниц
-//
+// Обработчики страниц
+// ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 // Подключаем обработку статических файлов для нужд клиента
 // (промежуточное ПО)
 //
-app.use(express.static(dir.frontend)); // каталог статических файлов клиента
+app.use(express.static(dir.frontend))  // каталог статических файлов клиента
 
 // ----------------------------------------------------------------------------
 // Подключаем обработку статических файлов для нужд сервера
 // (промежуточное ПО)
 //
-app.use(express.static(dir.public));   // каталог статических файлов сервера
+app.use(express.static(dir.public))    // каталог статических файлов сервера
 
 // ----------------------------------------------------------------------------
 // Пользовательская страница '/'
 //
 app.get('/', function(req, res) {
-  res.render('home');
-});
+  res.render('home')
+})
 
 // ----------------------------------------------------------------------------
 // Пользовательская страница '/users'
 //
-const users = {};     // массив? пользователей
-//const ids = {};       // массив? cookies
+const users = {}      // массив? пользователей
 
 app.get('/users', function (req, res) {
   const scorelist = Object.entries(users)
@@ -114,17 +112,17 @@ app.get('/users', function (req, res) {
         age: user.age,
         score:user.score,
       }
-    });
+    })
 
-  res.json(scorelist);
-});
+  res.json(scorelist)
+})
 
 // ----------------------------------------------------------------------------
 // Пользовательская страница /about
 //
 app.get('/about', function(req, res) {
-  res.render('about');
-});
+  res.render('about')
+})
 
 // ----------------------------------------------------------------------------
 // Пользовательская страница /headers
@@ -136,18 +134,7 @@ app.get('/headers', function(req,res){
   for(var name in req.headers)
     s += name + ': ' + req.headers[name] + '\n'
   res.send(s)
-});
-
-
-// ----------------------------------------------------------------------------
-// Внедрение данных в объект res.locals.partials
-// (промежуточное ПО)
-//
-app.use(function(req, res, next){
-  if(!res.locals.partials) res.locals.partials = {};
-  res.locals.partials.weatherContext = getWeatherData();
-  next();
-});
+})
 
 
 
@@ -156,19 +143,18 @@ app.use(function(req, res, next){
 // (промежуточное ПО)
 //
 app.use(function(req, res, next){
-  res.status(404);
-  res.render('404');
-});
+  res.status(404)
+  res.render('404')
+})
 
 // ----------------------------------------------------------------------------
 // Пользовательская страница 500
 // (промежуточное ПО)
 //
 app.use(function(err, req, res, next){
-  console.error(err.stack);
-  res.status(500);
-  res.render('500');
-});
-
+  console.error(err.stack)
+  res.status(500)
+  res.render('500')
+})
 
 module.exports = app
