@@ -19,7 +19,12 @@ console.log('\ndir.run      ==> ', dir.run)
 dir.project = path.dirname(dir.run)
 console.log('dir.project  ==> ', dir.project)
 
-// каталог статических  файлов
+// каталог статических файлов для нужд клиента
+//
+dir.frontend = dir.project + `/front`
+console.log('dir.frontend ==> ', dir.frontend)
+
+// каталог статических файлов для нужд сервера
 //
 dir.public = dir.project + `/public`
 console.log('dir.public   ==> ', dir.public)
