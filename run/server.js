@@ -6,13 +6,40 @@
 // ----------------------------------------------------------------------------
 // Собственные модули
 //
+
+// ----------------------------------------------------------------------------
+
 const app = require('./app')
 
-
-app.set('port', process.env.PORT || 3001)   // порт по умолчанию - 3001
+let port = normalizePort(process.env.PORT || '3001')
+app.set('port', port)                               // порт по умолчанию - 3001
 
 app.listen(app.get('port'), function() {
   console.log('\nСервер Express запущен в режиме ' + app.get('env') +
               '\nпо адресу http://localhost:' + app.get('port') +
               '\nдля завершения работы сервера нажните Ctrl+C.')
 })
+
+// ----------------------------------------------------------------------------
+// Функции
+// ----------------------------------------------------------------------------
+
+/**
+ * Нормализуем порт в число, строку или ложь.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}

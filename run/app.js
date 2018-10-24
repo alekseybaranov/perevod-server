@@ -52,6 +52,10 @@ app.engine(`hbs`, hbs( {
 }))
 app.set('view engine', 'hbs')
 
+// Отключаем выдачу информации о типе сервера и об операционной системе
+//
+app.disable('x-powered-by')
+
 // Подключаем промежуточное ПО журналирования
 //
 switch(app.get('env')){
@@ -115,6 +119,31 @@ app.get('/users', function (req, res) {
 app.get('/about', function(req, res) {
   res.render('about');
 });
+
+// ----------------------------------------------------------------------------
+// Пользовательская страница /headers
+// Отображает заголовки запроса браузера
+//
+app.get('/headers', function(req,res){
+  res.set('Content-Type','text/plain')
+  var s = ''
+  for(var name in req.headers)
+    s += name + ': ' + req.headers[name] + '\n'
+  res.send(s)
+});
+
+
+// ----------------------------------------------------------------------------
+// Внедрение данных в объект res.locals.partials
+// (промежуточное ПО)
+//
+app.use(function(req, res, next){
+  if(!res.locals.partials) res.locals.partials = {};
+  res.locals.partials.weatherContext = getWeatherData();
+  next();
+});
+
+
 
 // ----------------------------------------------------------------------------
 // Пользовательская страница 404
